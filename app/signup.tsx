@@ -2,6 +2,7 @@ import { Link, Redirect } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import AuthShell from '../components/AuthShell';
+import SocialButtons from '../components/SocialButtons';
 import { Button, Field, Message, PasswordField } from '../components/AuthFields';
 import { useAuth } from '../lib/auth-context';
 
@@ -45,6 +46,7 @@ export default function SignupScreen() {
       }
     >
       {error ? <Message kind="error">{error}</Message> : null}
+      <SocialButtons />
       <Field label="Your name" value={name} onChangeText={setName} autoComplete="given-name" maxLength={80} />
       <Field label="Email" value={email} onChangeText={setEmail} autoComplete="email" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
       <PasswordField label="Password" hint={`At least ${MIN_PASSWORD_LENGTH} characters.`} value={password} onChangeText={setPassword} autoComplete="new-password" />

@@ -2,6 +2,7 @@ import { Link, Redirect } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import AuthShell from '../components/AuthShell';
+import SocialButtons from '../components/SocialButtons';
 import { Button, Field, Message, PasswordField } from '../components/AuthFields';
 import { useAuth } from '../lib/auth-context';
 
@@ -40,6 +41,7 @@ export default function LoginScreen() {
       }
     >
       {error ? <Message kind="error">{error}</Message> : null}
+      <SocialButtons />
       <Field label="Email" value={email} onChangeText={setEmail} autoComplete="username" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
       <PasswordField label="Password" value={password} onChangeText={setPassword} autoComplete="current-password" />
       <Button onPress={signIn} busy={busy}>
