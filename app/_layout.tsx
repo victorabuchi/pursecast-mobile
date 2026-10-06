@@ -28,6 +28,7 @@ function Frame() {
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="signup" />
+        <Stack.Screen name="auth" />
         <Stack.Screen name="(app)" />
       </Stack>
       <StatusBar style={dark ? 'light' : 'dark'} />

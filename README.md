@@ -13,8 +13,8 @@ web app; nothing here is redesigned or invented.
 
 ## Status
 
-Ported from the web app, with its copy, colours and logic: sign in, sign up and
-the app frame (top bar, bell, search, calculator, note,
+Ported from the web app, with its copy, colours and logic: sign in and sign up with email, Google or
+Apple; the app frame (top bar, bell, search, calculator, note,
 account menu, tab bar); Forecast (Money Weather), Spending (activity, bills and
 income, owed, budgets, the pause note), Worth-It (with voice notes), Forks, Plan
 ahead (calendar, set aside, when money lands, want to buy), Statements, Banks,
@@ -44,6 +44,7 @@ that uses a bearer token instead of the cookie:
 
 | Route | What it does |
 | --- | --- |
+| `POST /api/mobile/apple`, `/exchange` | Native Sign in with Apple (the identity token is checked against Apple's keys) and the swap of a Google/Apple browser sign-in's code for a token (PKCE) |
 | `POST /api/mobile/login`, `/signup` | The login page's password sign-in and sign-up, answering with a token |
 | `GET /api/mobile/me` | Who is signed in and whether first-time setup is done |
 | `GET /api/mobile/money?days=` | The same `loadMoney()` the web pages are built from, as JSON (`409 {setup:true}` until a balance is set) |
