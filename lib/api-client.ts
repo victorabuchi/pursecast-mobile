@@ -52,9 +52,6 @@ export const login = (email: string, password: string) => signIn('/api/mobile/lo
 
 export const register = (name: string, email: string, password: string) => signIn('/api/mobile/signup', { name: name.trim(), email: email.trim().toLowerCase(), password });
 
-// "Email me a sign-in link". The server answers the same for every address.
-export const requestLink = (email: string) => request<{ sent: true; minutes: number }>('/api/mobile/link', { method: 'POST', body: { email: email.trim().toLowerCase() } });
-
 export async function logout(): Promise<void> {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
 }

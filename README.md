@@ -14,7 +14,7 @@ web app; nothing here is redesigned or invented.
 ## Status
 
 Ported from the web app, with its copy, colours and logic: sign in, sign up and
-"email me a sign-in link"; the app frame (top bar, bell, search, calculator, note,
+the app frame (top bar, bell, search, calculator, note,
 account menu, tab bar); Forecast (Money Weather), Spending (activity, bills and
 income, owed, budgets, the pause note), Worth-It (with voice notes), Forks, Plan
 ahead (calendar, set aside, when money lands, want to buy), Statements, Banks,
@@ -28,7 +28,6 @@ Differences from the web app:
 - Notifications use Expo push tokens (the server sends to them as well as to
   browsers); they need the EAS project id, set by `eas init`.
 - Links to the web's landing, privacy and terms pages open in the browser.
-- The emailed sign-in link opens in the browser, not in the app.
 
 `lib/money/*`, `lib/statements/*` (types, analysis, tabular), `lib/icons.ts`,
 `lib/photo-url.ts`, `lib/drafts.ts`, `lib/notes/plain.ts`, `lib/chart.ts` and
@@ -45,7 +44,7 @@ that uses a bearer token instead of the cookie:
 
 | Route | What it does |
 | --- | --- |
-| `POST /api/mobile/login`, `/signup`, `/link` | The login page's password sign-in, sign-up and email-link actions, answering with a token (or `sent`) |
+| `POST /api/mobile/login`, `/signup` | The login page's password sign-in and sign-up, answering with a token |
 | `GET /api/mobile/me` | Who is signed in and whether first-time setup is done |
 | `GET /api/mobile/money?days=` | The same `loadMoney()` the web pages are built from, as JSON (`409 {setup:true}` until a balance is set) |
 | `GET /api/mobile/page/<name>` | One screen's data: the money load plus that page's extra queries (forecast, spending, worth-it, forks, plan) |

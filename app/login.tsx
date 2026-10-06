@@ -2,8 +2,7 @@ import { Link, Redirect } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import AuthShell from '../components/AuthShell';
-import { Button, Divider, Field, Message, PasswordField } from '../components/AuthFields';
-import * as api from '../lib/api-client';
+import { Button, Field, Message, PasswordField } from '../components/AuthFields';
 import { useAuth } from '../lib/auth-context';
 
 export default function LoginScreen() {
@@ -11,35 +10,19 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [sent, setSent] = useState<number | null>(null);
-  const [busy, setBusy] = useState<'login' | 'link' | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (!isLoading && isLoggedIn) return <Redirect href="/" />;
 
   const signIn = async () => {
     setError('');
-    setSent(null);
-    setBusy('login');
+    setBusy(true);
     try {
       await login(email, password);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong. Try again.');
     } finally {
-      setBusy(null);
-    }
-  };
-
-  const emailLink = async () => {
-    setError('');
-    setSent(null);
-    setBusy('link');
-    try {
-      const res = await api.requestLink(email);
-      setSent(res.minutes);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong. Try again.');
-    } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
 
@@ -57,15 +40,10 @@ export default function LoginScreen() {
       }
     >
       {error ? <Message kind="error">{error}</Message> : null}
-      {sent ? <Message kind="success">{`If that email has a Pursecast account, a sign-in link is on its way. It works for ${sent} minutes.`}</Message> : null}
       <Field label="Email" value={email} onChangeText={setEmail} autoComplete="username" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
       <PasswordField label="Password" value={password} onChangeText={setPassword} autoComplete="current-password" />
-      <Button onPress={signIn} busy={busy === 'login'}>
+      <Button onPress={signIn} busy={busy}>
         Log in
-      </Button>
-      <Divider>or</Divider>
-      <Button ghost onPress={emailLink} busy={busy === 'link'}>
-        Email me a sign-in link
       </Button>
     </AuthShell>
   );
