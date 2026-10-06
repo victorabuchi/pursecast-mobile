@@ -72,7 +72,7 @@ device needs your machine's LAN IP, and the Android emulator needs
 ## Releasing
 
 `eas.json` follows the other apps: `production` builds an iOS archive and an
-Android `.aab` against `https://pursecast.onrender.com`; `preview` builds an
+Android `.aab` against `https://pursecast.com`; `preview` builds an
 internal APK.
 
 ```bash

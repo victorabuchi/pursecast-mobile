@@ -10,7 +10,7 @@
         "resourceClass": "m-medium"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://pursecast.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://pursecast.com"
       },
       "android": {
         "buildType": "app-bundle"
@@ -22,7 +22,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://pursecast.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://pursecast.com"
       }
     }
   },
