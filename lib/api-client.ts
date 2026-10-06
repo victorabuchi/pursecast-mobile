@@ -1,4 +1,7 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
 
 const TOKEN_KEY = 'pursecast_session_token';
 
@@ -116,3 +119,43 @@ export const getSetup = () => request<import('./types').SetupData>('/api/mobile/
 export const getBanks = () => request<import('./types').BanksData>('/api/mobile/banks');
 
 export const getStatements = (statementId?: string | null) => request<import('./types').StatementsData>(`/api/mobile/statements${statementId ? `?s=${statementId}` : ''}`);
+
+// Sign in with Google (and Apple on Android): the web's own flow, in the system
+// sign-in browser. It ends at pursecast://auth with a short-lived code, which is
+// swapped for the session token together with a secret only this app knows
+// (PKCE), so another app that catches the address cannot use it.
+const b64url = (s: string) => s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+export async function loginWithProvider(provider: 'google' | 'apple'): Promise<boolean> {
+  const verifier = b64url(btoa(String.fromCharCode(...(await Crypto.getRandomBytesAsync(32)))));
+  const challenge = b64url(await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, verifier, { encoding: Crypto.CryptoEncoding.BASE64 }));
+  const result = await WebBrowser.openAuthSessionAsync(`${API_BASE_URL}/auth/${provider}?intent=mobile&challenge=${challenge}`, 'pursecast://auth');
+  if (result.type !== 'success') return false;
+  const params = new URLSearchParams(result.url.split('?')[1] ?? '');
+  const error = params.get('error');
+  if (error) throw new ApiError(error);
+  const code = params.get('code');
+  if (!code) throw new ApiError(`${provider === 'google' ? 'Google' : 'Apple'} sign-in did not finish. Try again.`);
+  const { token } = await request<{ token: string }>('/api/mobile/exchange', { method: 'POST', body: { code, verifier } });
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
+  return true;
+}
+
+// The iPhone's own Sign in with Apple sheet. Apple's signed identity token goes
+// to the server, which checks it against Apple's keys; the nonce ties the token
+// to this attempt. Apple gives the name only the first time.
+export async function loginWithAppleNative(): Promise<boolean> {
+  const nonce = b64url(btoa(String.fromCharCode(...(await Crypto.getRandomBytesAsync(24)))));
+  const hashed = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, nonce);
+  let credential: AppleAuthentication.AppleAuthenticationCredential;
+  try {
+    credential = await AppleAuthentication.signInAsync({ requestedScopes: [AppleAuthentication.AppleAuthenticationScope.FULL_NAME, AppleAuthentication.AppleAuthenticationScope.EMAIL], nonce: hashed });
+  } catch (e) {
+    if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return false;
+    throw new ApiError('Apple sign-in did not finish. Try again.');
+  }
+  if (!credential.identityToken) throw new ApiError('Apple sign-in did not finish. Try again.');
+  const name = [credential.fullName?.givenName, credential.fullName?.familyName].filter(Boolean).join(' ');
+  await signIn('/api/mobile/apple', { identityToken: credential.identityToken, nonce, name });
+  return true;
+}

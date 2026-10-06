@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import * as api from './api-client';
 
@@ -7,6 +8,8 @@ type AuthContextValue = {
   me: api.Me | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<boolean>;
+  loginWithApple: () => Promise<boolean>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
 };
@@ -47,6 +50,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await api.register(name, email, password);
       await load();
       setIsLoggedIn(true);
+    },
+    loginWithGoogle: async () => {
+      const done = await api.loginWithProvider('google');
+      if (done) {
+        await load();
+        setIsLoggedIn(true);
+      }
+      return done;
+    },
+    // The iPhone's own sheet; Android uses the web flow, like Google.
+    loginWithApple: async () => {
+      const done = Platform.OS === 'ios' ? await api.loginWithAppleNative() : await api.loginWithProvider('apple');
+      if (done) {
+        await load();
+        setIsLoggedIn(true);
+      }
+      return done;
     },
     refreshMe: async () => {
       await load();
