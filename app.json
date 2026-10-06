@@ -12,7 +12,8 @@
       "bundleIdentifier": "com.pursecast.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -63,7 +64,8 @@
           "color": "#0f7a63"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-apple-authentication"
     ],
     "extra": {
       "router": {},
