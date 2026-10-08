@@ -1,6 +1,6 @@
 import { useRouter, usePathname } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Image, Pressable, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../lib/auth-context';
 import { useShell, useGo } from '../lib/shell-context';
@@ -32,6 +32,8 @@ export default function TopBar() {
   const { logout } = useAuth();
   const { shell, refreshShell } = useShell();
   const { run } = useRunner(refreshShell);
+  // On a phone there is no room for the "/ Personal" label beside six buttons.
+  const wide = useWindowDimensions().width >= 600;
   const [calc, setCalc] = useState(false);
   const [note, setNote] = useState(false);
   const [search, setSearch] = useState(false);
@@ -63,8 +65,8 @@ export default function TopBar() {
         <Pressable onPress={() => router.navigate('/forecast')} accessibilityLabel="Pursecast home" style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: c.b, alignItems: 'center', justifyContent: 'center' }}>
           <Mark size={20} />
         </Pressable>
-        <Txt style={{ color: '#c4cad3' }}>/</Txt>
-        <Txt style={{ fontWeight: '700' }}>Personal</Txt>
+        {wide && <Txt style={{ color: '#c4cad3' }}>/</Txt>}
+        {wide && <Txt style={{ fontWeight: '700' }}>Personal</Txt>}
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
           <Pressable
             onPress={() => router.navigate('/setup')}
