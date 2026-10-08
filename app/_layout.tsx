@@ -4,10 +4,20 @@ import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import ErrorScreen from '../components/ErrorScreen';
 import { AuthProvider } from '../lib/auth-context';
 import { ThemeProvider, useTheme } from '../lib/theme-context';
 
 void SplashScreen.preventAutoHideAsync();
+
+// A screen that throws while drawing shows its message instead of closing the app.
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return (
+    <ThemeProvider>
+      <ErrorScreen error={error} retry={retry} />
+    </ThemeProvider>
+  );
+}
 
 function Frame() {
   const { dark } = useTheme();
