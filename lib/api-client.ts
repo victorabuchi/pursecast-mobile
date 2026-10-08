@@ -130,7 +130,9 @@ export async function loginWithProvider(provider: 'google' | 'apple'): Promise<b
   const verifier = b64url(btoa(String.fromCharCode(...(await Crypto.getRandomBytesAsync(32)))));
   const challenge = b64url(await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, verifier, { encoding: Crypto.CryptoEncoding.BASE64 }));
   const result = await WebBrowser.openAuthSessionAsync(`${API_BASE_URL}/auth/${provider}?intent=mobile&challenge=${challenge}`, 'pursecast://auth');
-  if (result.type !== 'success') return false;
+  // Closing the browser is a choice, not an error; anything else is worth saying.
+  if (result.type === 'cancel' || result.type === 'dismiss') return false;
+  if (result.type !== 'success') throw new ApiError(`${provider === 'google' ? 'Google' : 'Apple'} sign-in could not open (${result.type}). Try again.`);
   const params = new URLSearchParams(result.url.split('?')[1] ?? '');
   const error = params.get('error');
   if (error) throw new ApiError(error);
