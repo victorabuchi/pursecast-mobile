@@ -1,9 +1,11 @@
 import { Redirect, Tabs } from 'expo-router';
+import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppTabBar, { tabsHeight } from '../../components/AppTabBar';
 import TopBar from '../../components/TopBar';
 import { ToastProvider } from '../../components/ui';
 import { useAuth } from '../../lib/auth-context';
+import { prefetchPages } from '../../lib/use-page';
 import { ShellProvider, useShell } from '../../lib/shell-context';
 
 // Signed-in pages share the app frame (the web's (app)/layout.tsx): the top
@@ -24,6 +26,12 @@ function Frame() {
   const insets = useSafeAreaInsets();
   const { shell } = useShell();
   const setUp = shell ? shell.setUp : true;
+  // Once the app is open, fetch the other main screens quietly so tabs open ready.
+  useEffect(() => {
+    if (!shell?.setUp) return;
+    const t = setTimeout(() => void prefetchPages(), 2500);
+    return () => clearTimeout(t);
+  }, [shell?.setUp]);
   return (
     <>
       <ToastProvider bottom={setUp ? tabsHeight(insets.bottom) + 24 : insets.bottom + 90}>

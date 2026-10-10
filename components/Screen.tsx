@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useTheme } from '../lib/theme-context';
 import { Txt } from './ui';
+import WeatherLoader from './WeatherLoader';
 
 // A page: the .main column (18 / 16 padding, 14 gap) on the page background,
 // pull down to reload.
@@ -25,7 +26,7 @@ export default function Screen({ children, onRefresh, refreshing, error, loading
           <Txt style={{ color: c.neg, fontWeight: '600' }}>{error}</Txt>
         </View>
       ) : null}
-      {loading ? null : children}
+      {loading ? <WeatherLoader /> : children}
     </ScrollView>
       {footer ? <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>{footer}</View> : null}
     </View>
