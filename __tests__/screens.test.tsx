@@ -49,6 +49,7 @@ jest.mock('../lib/api-client', () => {
 import { AuthProvider } from '../lib/auth-context';
 import { ShellProvider } from '../lib/shell-context';
 import { ThemeProvider } from '../lib/theme-context';
+import { ToolsProvider } from '../lib/tools-context';
 import { ToastProvider } from '../components/ui';
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, left: 0, right: 0, bottom: 34 } };
@@ -57,7 +58,9 @@ const wrap = (ui: React.ReactElement) => (
     <ThemeProvider>
       <AuthProvider>
         <ShellProvider>
-          <ToastProvider>{ui}</ToastProvider>
+          <ToolsProvider>
+            <ToastProvider>{ui}</ToastProvider>
+          </ToolsProvider>
         </ShellProvider>
       </AuthProvider>
     </ThemeProvider>

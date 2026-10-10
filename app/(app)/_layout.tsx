@@ -5,6 +5,8 @@ import AppTabBar, { tabsHeight } from '../../components/AppTabBar';
 import TopBar from '../../components/TopBar';
 import { ToastProvider } from '../../components/ui';
 import { useAuth } from '../../lib/auth-context';
+import ToolsHost from '../../components/tools/ToolsHost';
+import { ToolsProvider } from '../../lib/tools-context';
 import { prefetchPages } from '../../lib/use-page';
 import { ShellProvider, useShell } from '../../lib/shell-context';
 
@@ -17,7 +19,9 @@ export default function AppLayout() {
   if (!isLoggedIn) return <Redirect href="/login" />;
   return (
     <ShellProvider>
-      <Frame />
+      <ToolsProvider>
+        <Frame />
+      </ToolsProvider>
     </ShellProvider>
   );
 }
@@ -46,6 +50,7 @@ function Frame() {
           <Tabs.Screen name="settings" options={{ href: null, title: 'Settings' }} />
           <Tabs.Screen name="setup" options={{ href: null, title: 'Your setup' }} />
         </Tabs>
+        {setUp && <ToolsHost />}
       </ToastProvider>
     </>
   );

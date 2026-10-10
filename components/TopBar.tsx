@@ -12,9 +12,8 @@ import { useRunner } from '../lib/use-page';
 import Faces from './Faces';
 import I, { type IconName } from './Icon';
 import Mark from './Mark';
-import Calculator from './tools/Calculator';
-import NoteSheet from './tools/NoteSheet';
 import Palette from './tools/Palette';
+import { useTools } from '../lib/tools-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 import PopoverMenu, { PopHead, PopItem } from './PopoverMenu';
 import { Txt } from './ui';
@@ -34,8 +33,7 @@ export default function TopBar() {
   const { run } = useRunner(refreshShell);
   // On a phone there is no room for the "/ Personal" label beside six buttons.
   const wide = useWindowDimensions().width >= 600;
-  const [calc, setCalc] = useState(false);
-  const [note, setNote] = useState(false);
+  const tools = useTools();
   const [search, setSearch] = useState(false);
   const bell = shell?.bell ?? [];
   const reminders = shell?.reminders ?? [];
@@ -78,13 +76,13 @@ export default function TopBar() {
             <I d="sliders" size={16} color={c.b} />
           </Pressable>
 
-          <Pressable onPress={() => setCalc(true)} accessibilityRole="button" accessibilityLabel="Calculator" style={icon}>
+          <Pressable onPress={() => tools.toggle('calculator')} accessibilityRole="button" accessibilityLabel="Calculator" accessibilityState={{ selected: tools.open.calculator }} style={{ ...icon, ...(tools.open.calculator ? { borderColor: c.b, backgroundColor: c.bt } : null) }}>
             <Svg viewBox="0 0 24 24" width={17} height={17} fill="none" stroke={c.muted} strokeWidth={2} strokeLinecap="round">
               <Rect x={5} y={2.5} width={14} height={19} rx={3} />
               <Path d="M8.5 6.5h7M9 11h.01M12 11h.01M15 11h.01M9 14.5h.01M12 14.5h.01M15 14.5h.01M9 18h.01M12 18h.01M15 18h.01" />
             </Svg>
           </Pressable>
-          <Pressable onPress={() => setNote(true)} accessibilityRole="button" accessibilityLabel="Note" style={icon}>
+          <Pressable onPress={() => tools.toggle('note')} accessibilityRole="button" accessibilityLabel="Note" accessibilityState={{ selected: tools.open.note }} style={{ ...icon, ...(tools.open.note ? { borderColor: c.b, backgroundColor: c.bt } : null) }}>
             <Svg viewBox="0 0 24 24" width={17} height={17} fill="none" stroke={c.muted} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <Path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
               <Path d="M14 3v6h6M8 13h8M8 17h5" />
@@ -180,8 +178,6 @@ export default function TopBar() {
           </PopoverMenu>
         </View>
       </View>
-      <Calculator open={calc} onClose={() => setCalc(false)} />
-      <NoteSheet open={note} onClose={() => setNote(false)} initial={shell?.notepad ?? ''} savedAt={shell?.notepadAt ?? null} />
       <Palette open={search} onClose={() => setSearch(false)} items={shell?.palette ?? []} />
     </View>
   );
