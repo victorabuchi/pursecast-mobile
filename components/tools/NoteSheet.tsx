@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Modal, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fromPlain } from '../../lib/notes/plain';
 import * as api from '../../lib/api-client';
@@ -36,6 +36,8 @@ function toPlain(html: string): string {
 export default function NoteSheet({ open, onClose, initial, savedAt }: { open: boolean; onClose: () => void; initial: string; savedAt: string | null }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const cardW = Math.min(width - 32, 360);
   const readOnly = RICH.test(initial) || RECORDING.test(initial);
   const [text, setText] = useState(() => toPlain(initial));
   const [saved, setSaved] = useState<string | null>(savedAt);
@@ -70,10 +72,10 @@ export default function NoteSheet({ open, onClose, initial, savedAt }: { open: b
   });
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, justifyContent: 'flex-end' }}>
+    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Pressable onPress={onClose} accessibilityLabel="Close note" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,24,31,0.32)' }} />
-        <View style={{ height: '70%', borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: c.card, paddingBottom: insets.bottom }}>
+        <View style={{ width: cardW, height: Math.min(height - insets.top - insets.bottom - 80, 520), borderRadius: 22, borderWidth: 1, borderColor: c.line, backgroundColor: c.card, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 40, shadowOffset: { width: 0, height: 24 }, elevation: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingTop: 14, paddingHorizontal: 18, paddingBottom: 10 }}>
             <Txt style={{ flex: 1, fontSize: 17, fontWeight: '700' }}>Note</Txt>
             {!readOnly && (

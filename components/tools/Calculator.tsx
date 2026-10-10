@@ -81,7 +81,8 @@ export default function Calculator({ open, onClose }: { open: boolean; onClose: 
 
   // Keys are round and share the sheet's width, four to a row.
   const { width } = useWindowDimensions();
-  const size = Math.min(76, Math.floor((width - 32 - 3 * 10) / 4));
+  const cardW = Math.min(width - 32, 360);
+  const size = Math.min(76, Math.floor((cardW - 32 - 3 * 10) / 4));
 
   const key = (k: string, kind: 'num' | 'fn' | 'op', aria: string, i: number | string) => (
     <Pressable key={i} onPress={() => press(k)} accessibilityRole="button" accessibilityLabel={aria} style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: kind === 'op' ? '#ff9f0a' : kind === 'fn' ? w.fn : w.num, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] })}>
@@ -99,10 +100,10 @@ export default function Calculator({ open, onClose }: { open: boolean; onClose: 
 
   // The same shape as the note: a sheet from the bottom with a close button.
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Pressable onPress={onClose} accessibilityLabel="Close calculator" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,24,31,0.32)' }} />
-        <View style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: w.bg, paddingTop: 14, paddingHorizontal: 16, paddingBottom: insets.bottom + 12 }}>
+        <View style={{ width: cardW, borderRadius: 22, borderWidth: 1, borderColor: w.line, backgroundColor: w.bg, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 16, shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 40, shadowOffset: { width: 0, height: 24 }, elevation: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Txt style={{ flex: 1, color: w.fg, fontSize: 17, fontWeight: '700' }}>Calculator</Txt>
             <Pressable onPress={() => setSide((v) => !v)} accessibilityRole="button" accessibilityLabel="History" accessibilityState={{ selected: side }} style={round(side)}>
