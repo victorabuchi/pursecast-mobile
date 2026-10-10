@@ -101,3 +101,4 @@ test('Top bar', async () => {
   render(wrap(<TopBar />));
   await act(async () => {});
 });
+

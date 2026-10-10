@@ -69,7 +69,14 @@ export default function PlanScreen() {
     me.today,
   );
   const open = eventId ? events.find((e) => e.id === eventId) : undefined;
-  const mark = (key: string) => ({ onLayout: (e: { nativeEvent: { layout: { y: number } } }) => setOffsets((o) => (o[key] === e.nativeEvent.layout.y ? o : { ...o, [key]: e.nativeEvent.layout.y })) });
+  // Read the position now: the event is gone by the time React runs the update.
+  const mark = (key: string) => ({
+    testID: `section-${key}`,
+    onLayout: (e: { nativeEvent: { layout: { y: number } } }) => {
+      const y = e.nativeEvent.layout.y;
+      setOffsets((o) => (o[key] === y ? o : { ...o, [key]: y }));
+    },
+  });
 
   return (
     <Screen error={error} onRefresh={reload} refreshing={false} scrollToY={scrollTo}>

@@ -141,7 +141,14 @@ function SetupForm({ data, reload }: { data: SetupData; reload: () => Promise<vo
 
   const [offsets, setOffsets] = useState<Record<string, number>>({});
   const [scrollTo, setScrollTo] = useState<number | null>(null);
-  const mark = (key: string) => ({ onLayout: (e: { nativeEvent: { layout: { y: number } } }) => setOffsets((o) => (o[key] === e.nativeEvent.layout.y ? o : { ...o, [key]: e.nativeEvent.layout.y })) });
+  // Read the position now: the event is gone by the time React runs the update.
+  const mark = (key: string) => ({
+    testID: `section-${key}`,
+    onLayout: (e: { nativeEvent: { layout: { y: number } } }) => {
+      const y = e.nativeEvent.layout.y;
+      setOffsets((o) => (o[key] === y ? o : { ...o, [key]: y }));
+    },
+  });
   const jump = (id: string) => {
     setScrollTo(null);
     setTimeout(() => setScrollTo(offsets[id] ?? 0), 0);
