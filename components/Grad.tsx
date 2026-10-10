@@ -9,14 +9,14 @@ export default function Grad({ from, to, style, children }: { from: string; to: 
   const id = `g${++seq}`;
   return (
     <View style={[{ overflow: 'hidden' }, style]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none" pointerEvents="none">
         <Defs>
           <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={from} />
             <Stop offset="1" stopColor={to} />
           </LinearGradient>
         </Defs>
-        <Rect width="100%" height="100%" fill={`url(#${id})`} />
+        <Rect x="0" y="0" width="1" height="1" fill={`url(#${id})`} />
       </Svg>
       {children}
     </View>
