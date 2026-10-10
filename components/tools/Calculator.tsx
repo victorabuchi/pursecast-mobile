@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { Txt } from '../ui';
@@ -79,68 +79,80 @@ export default function Calculator({ open, onClose }: { open: boolean; onClose: 
   const result = done ? done.result : live !== null && expr ? show(live) : '';
   const shown = expr && !done ? pretty(expr) : (result || '0').replace('.', ',');
 
+  // Keys are round and share the sheet's width, four to a row.
+  const { width } = useWindowDimensions();
+  const size = Math.min(76, Math.floor((width - 32 - 3 * 10) / 4));
+
   const key = (k: string, kind: 'num' | 'fn' | 'op', aria: string, i: number | string) => (
-    <Pressable key={i} onPress={() => press(k)} accessibilityRole="button" accessibilityLabel={aria} style={({ pressed }) => ({ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: kind === 'op' ? '#ff9f0a' : kind === 'fn' ? w.fn : w.num, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] })}>
+    <Pressable key={i} onPress={() => press(k)} accessibilityRole="button" accessibilityLabel={aria} style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2, alignItems: 'center', justifyContent: 'center', backgroundColor: kind === 'op' ? '#ff9f0a' : kind === 'fn' ? w.fn : w.num, opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.95 : 1 }] })}>
       {k === '⌫' ? (
-        <Svg viewBox="0 0 24 24" width={26} height={26} fill="none" stroke={w.fg} strokeWidth={1.8} strokeLinejoin="round">
+        <Svg viewBox="0 0 24 24" width={28} height={28} fill="none" stroke={w.fg} strokeWidth={1.8} strokeLinejoin="round">
           <Path d="M8 5h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8l-6-7Z" />
           <Path d="m11 9 6 6M17 9l-6 6" />
         </Svg>
       ) : (
-        <Txt style={{ color: kind === 'op' ? '#fff' : w.fg, fontSize: kind === 'op' ? 26 : kind === 'fn' ? 20 : 22, lineHeight: 30, fontWeight: '400' }}>{k === '±' ? '⁺∕₋' : pretty(k)}</Txt>
+        <Txt style={{ color: kind === 'op' ? '#fff' : w.fg, fontSize: kind === 'op' ? 30 : kind === 'fn' ? 22 : 26, lineHeight: 34, fontWeight: '400' }}>{k === '±' ? '⁺∕₋' : pretty(k)}</Txt>
       )}
     </Pressable>
   );
+  const round = (on: boolean) => ({ width: 38, height: 38, borderRadius: 19, borderWidth: 1, borderColor: w.line, backgroundColor: on ? w.soft2 : w.soft, alignItems: 'center', justifyContent: 'center' } as const);
 
+  // The same shape as the note: a sheet from the bottom with a close button.
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable onPress={onClose} accessibilityLabel="Close calculator" style={{ flex: 1, backgroundColor: 'rgba(20,24,31,0.32)', alignItems: 'center', justifyContent: 'center', paddingTop: insets.top, paddingBottom: insets.bottom }}>
-        <Pressable onPress={() => undefined} style={{ flexDirection: 'row', borderRadius: 22, backgroundColor: w.bg, borderWidth: 1, borderColor: w.line, overflow: 'hidden' }}>
-          {side && (
-            <View style={{ width: 170, maxHeight: 520, borderRightWidth: 1, borderRightColor: w.line }}>
-              <ScrollView contentContainerStyle={{ gap: 4, paddingTop: 58, paddingRight: 8, paddingBottom: 12, paddingLeft: 12 }}>
-                <Txt style={{ color: w.fg, fontSize: 13, fontWeight: '700', marginBottom: 6 }}>History</Txt>
-                {tape.length === 0 && <Txt style={{ color: w.muted, fontSize: 12 }}>Your sums appear here.</Txt>}
-                {tape.map((l, i) => (
-                  <Pressable key={i} onPress={() => set(String(evaluate(l.expr) ?? ''))} style={{ alignItems: 'flex-end', paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8 }}>
-                    <Txt style={{ color: w.muted, fontSize: 11 }}>{pretty(l.expr)}</Txt>
-                    <Txt style={{ color: w.fg, fontSize: 16 }}>{l.result.replace('.', ',')}</Txt>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-          <View style={{ width: 232, paddingTop: 10, paddingHorizontal: 10, paddingBottom: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, paddingLeft: 8 }}>
-              <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: '#ff5f57' }} />
-              <Pressable onPress={() => setSide((s) => !s)} accessibilityRole="button" accessibilityLabel="History" accessibilityState={{ selected: side }} style={{ width: 38, height: 38, borderRadius: 19, borderWidth: 1, borderColor: w.line, backgroundColor: side ? w.soft2 : w.soft, alignItems: 'center', justifyContent: 'center' }}>
-                <Svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke={w.fg} strokeWidth={1.8}>
-                  <Rect x={3} y={5} width={18} height={14} rx={3} />
-                  <Path d="M9 5v14M5.5 9h1.5M5.5 12h1.5M5.5 15h1.5" />
-                </Svg>
-              </Pressable>
-              <View style={{ flex: 1 }} />
-              <Pressable onPress={() => setSci((s) => !s)} accessibilityRole="button" accessibilityLabel="More keys" accessibilityState={{ selected: sci }} style={{ width: 38, height: 38, borderRadius: 19, borderWidth: 1, borderColor: w.line, backgroundColor: sci ? w.soft2 : w.soft, alignItems: 'center', justifyContent: 'center' }}>
-                <Svg viewBox="0 0 24 24" width={20} height={20} fill={w.fg}>
-                  <Rect x={5} y={2.5} width={14} height={19} rx={3} fill="none" stroke={w.fg} strokeWidth={1.8} />
-                  <Rect x={8} y={5.5} width={8} height={3} rx={1} />
-                </Svg>
-              </Pressable>
-            </View>
-            <View style={{ alignItems: 'flex-end', gap: 2, minHeight: 104, paddingTop: 14, paddingHorizontal: 8, paddingBottom: 10 }}>
-              <Txt style={{ color: w.muted, fontSize: 13 }} numberOfLines={1}>
-                {done ? pretty(done.expr) : note || ' '}
-              </Txt>
-              <Txt accessibilityLiveRegion="polite" numberOfLines={1} style={{ color: w.fg, fontSize: fit(shown), lineHeight: fit(shown) * 1.1, fontWeight: '300', letterSpacing: -0.02 * fit(shown), fontVariant: ['tabular-nums'] }}>
-                {shown}
-              </Txt>
-              <Txt style={{ color: '#ff9f0a', fontSize: 13 }}>{!done && result && expr !== result ? `= ${result.replace('.', ',')}` : ' '}</Txt>
-            </View>
-            {sci && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center', marginBottom: 10 }}>{['(', ')', '√', 'x²'].map((k) => key(k, 'fn', k === '√' ? 'Square root' : k === 'x²' ? 'Squared' : k, `s${k}`))}</View>}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center' }}>{KEYS.map(([k, kind, aria], i) => key(k, kind, aria, i))}</View>
+    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+        <Pressable onPress={onClose} accessibilityLabel="Close calculator" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,24,31,0.32)' }} />
+        <View style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: w.bg, paddingTop: 14, paddingHorizontal: 16, paddingBottom: insets.bottom + 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Txt style={{ flex: 1, color: w.fg, fontSize: 17, fontWeight: '700' }}>Calculator</Txt>
+            <Pressable onPress={() => setSide((v) => !v)} accessibilityRole="button" accessibilityLabel="History" accessibilityState={{ selected: side }} style={round(side)}>
+              <Svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke={w.fg} strokeWidth={1.8}>
+                <Rect x={3} y={5} width={18} height={14} rx={3} />
+                <Path d="M9 5v14M5.5 9h1.5M5.5 12h1.5M5.5 15h1.5" />
+              </Svg>
+            </Pressable>
+            <Pressable onPress={() => setSci((v) => !v)} accessibilityRole="button" accessibilityLabel="More keys" accessibilityState={{ selected: sci }} style={round(sci)}>
+              <Svg viewBox="0 0 24 24" width={20} height={20} fill={w.fg}>
+                <Rect x={5} y={2.5} width={14} height={19} rx={3} fill="none" stroke={w.fg} strokeWidth={1.8} />
+                <Rect x={8} y={5.5} width={8} height={3} rx={1} />
+              </Svg>
+            </Pressable>
+            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" hitSlop={8} style={round(false)}>
+              <Svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke={w.fg} strokeWidth={2} strokeLinecap="round">
+                <Path d="M6 6l12 12M18 6 6 18" />
+              </Svg>
+            </Pressable>
           </View>
-        </Pressable>
-      </Pressable>
+          <View style={{ alignItems: 'flex-end', gap: 2, minHeight: 104, paddingTop: 14, paddingHorizontal: 8, paddingBottom: 10 }}>
+            <Txt style={{ color: w.muted, fontSize: 13 }} numberOfLines={1}>
+              {done ? pretty(done.expr) : note || ' '}
+            </Txt>
+            <Txt accessibilityLiveRegion="polite" numberOfLines={1} style={{ color: w.fg, fontSize: fit(shown) + 14, lineHeight: (fit(shown) + 14) * 1.1, fontWeight: '300', letterSpacing: -0.02 * fit(shown), fontVariant: ['tabular-nums'] }}>
+              {shown}
+            </Txt>
+            <Txt style={{ color: '#ff9f0a', fontSize: 13 }}>{!done && result && expr !== result ? `= ${result.replace('.', ',')}` : ' '}</Txt>
+          </View>
+          {side && (
+            <ScrollView style={{ maxHeight: 130, marginBottom: 8 }} contentContainerStyle={{ gap: 4 }}>
+              {tape.length === 0 && <Txt style={{ color: w.muted, fontSize: 12 }}>Your sums appear here.</Txt>}
+              {tape.map((l, i) => (
+                <Pressable key={i} onPress={() => set(String(evaluate(l.expr) ?? ''))} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, paddingHorizontal: 8, borderRadius: 8, backgroundColor: w.soft }}>
+                  <Txt style={{ color: w.muted, fontSize: 13 }}>{pretty(l.expr)}</Txt>
+                  <Txt style={{ color: w.fg, fontSize: 15 }}>{l.result.replace('.', ',')}</Txt>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+          {sci && <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>{['(', ')', '√', 'x²'].map((k) => key(k, 'fn', k === '√' ? 'Square root' : k === 'x²' ? 'Squared' : k, `s${k}`))}</View>}
+          <View style={{ gap: 10 }}>
+            {[0, 1, 2, 3, 4].map((r) => (
+              <View key={r} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                {KEYS.slice(r * 4, r * 4 + 4).map(([k, kind, aria], i) => key(k, kind, aria, `${r}${i}`))}
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 }
