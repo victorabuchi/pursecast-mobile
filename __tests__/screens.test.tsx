@@ -64,6 +64,13 @@ const wrap = (ui: React.ReactElement) => (
   </SafeAreaProvider>
 );
 
+// The phone's JavaScript engine (Hermes) has no formatToParts: take it away here
+// too, so a screen that needs it fails in the tests and not on the phone.
+beforeAll(() => {
+  delete (Intl.NumberFormat.prototype as { formatToParts?: unknown }).formatToParts;
+  delete (Intl.DateTimeFormat.prototype as { formatToParts?: unknown }).formatToParts;
+});
+
 beforeEach(() => {
   mockParams = {};
   Object.assign(mockPages, { forecast: fx.forecastData, spending: fx.spendingData, 'worth-it': fx.worthData, forks: fx.forksData, plan: fx.planData, setup: fx.setupEdit, banks: fx.banksData, statements: fx.statementsData, settings: fx.settingsData, shell: fx.shell });

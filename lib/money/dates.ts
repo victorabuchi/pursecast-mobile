@@ -21,7 +21,11 @@ function fromUtc(ms: number): string {
 
 export function todayIn(timeZone: string, now = new Date()): string {
   try {
-    const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
+    const f = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
+    // The phone's engine has no formatToParts; en-CA already prints YYYY-MM-DD.
+    const text = f.format(now);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+    const parts = f.formatToParts(now);
     const get = (t: string) => parts.find((p) => p.type === t)!.value;
     return `${get('year')}-${get('month')}-${get('day')}`;
   } catch {

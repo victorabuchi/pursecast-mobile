@@ -32,7 +32,8 @@ export function exact(amount: number, currency: string, opts: { sign?: boolean }
 }
 
 export function currencySymbol(currency: string): string {
-  return nf(currency, false).formatToParts(0).find((p) => p.type === 'currency')?.value ?? currency;
+  // The phone's engine has no formatToParts: format zero and drop the digits.
+  return nf(currency, false).format(0).replace(/[\d\s.,\u00a0]/g, '') || currency;
 }
 
 // Parses "12", "12.5", "12,50", "1 200", "€1,200.00" into cents. Null when not a number.

@@ -29,7 +29,7 @@ Differences from the web app:
   browsers); they need the EAS project id, set by `eas init`.
 - Links to the web's landing, privacy and terms pages open in the browser.
 
-`lib/money/*`, `lib/statements/*` (types, analysis, tabular), `lib/icons.ts`,
+`lib/money/*` (except two small changes: `currencySymbol` in `format.ts` and `todayIn` in `dates.ts` avoid `formatToParts`, which the phone's JavaScript engine lacks), `lib/statements/*` (types, analysis, tabular), `lib/icons.ts`,
 `lib/photo-url.ts`, `lib/drafts.ts`, `lib/notes/plain.ts`, `lib/chart.ts` and
 `lib/icon-paths.ts` are verbatim copies of their web counterparts, so re-copy
 them when the web versions change.
