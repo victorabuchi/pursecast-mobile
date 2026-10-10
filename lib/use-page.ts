@@ -1,23 +1,40 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as api from './api-client';
+import { cache, keyOf } from './page-cache';
 import { useAuth } from './auth-context';
 import { useToast } from '../components/ui';
+
+// The main screens' data, fetched one after another in the background once the
+// app is open, so tapping a tab finds it ready. (Matches what each screen asks.)
+export async function prefetchPages(): Promise<void> {
+  for (const [name, days] of [['spending', undefined], ['worth-it', undefined], ['plan', 366], ['forks', 290]] as const) {
+    const key = keyOf(name, days);
+    if (cache.has(key)) continue;
+    try {
+      cache.set(key, await api.getPage(name, days));
+    } catch {
+      return; // offline, signed out, or first-time setup: the screens will say so themselves
+    }
+  }
+}
 
 // Loads one screen's data from the web, again whenever the screen comes back
 // into view, and sends first-time users to setup (as the web's requireSetUp does).
 export function usePage<T>(name: string, days?: number, query?: Record<string, string>) {
   const router = useRouter();
   const { logout } = useAuth();
-  const [data, setData] = useState<T | null>(null);
+  const key = keyOf(name, days, query);
+  const [data, setData] = useState<T | null>((cache.get(key) as T | undefined) ?? null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cache.has(key));
   const seq = useRef(0);
 
   const reload = useCallback(async () => {
     const mine = ++seq.current;
     try {
       const next = await api.getPage<T>(name, days, query);
+      cache.set(key, next);
       if (mine === seq.current) {
         setData(next);
         setError('');
@@ -29,8 +46,13 @@ export function usePage<T>(name: string, days?: number, query?: Record<string, s
     } finally {
       if (mine === seq.current) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, days, JSON.stringify(query), router, logout]);
+  }, [key, router, logout]);
+
+  // Another view of the same screen (a different forecast range) that was seen before shows at once.
+  useEffect(() => {
+    const known = cache.get(key);
+    if (known) setData(known as T);
+  }, [key]);
 
   useFocusEffect(
     useCallback(() => {

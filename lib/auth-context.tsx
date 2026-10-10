@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import * as api from './api-client';
+import { clearPageCache } from './page-cache';
 
 type AuthContextValue = {
   isLoggedIn: boolean;
@@ -72,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await load();
     },
     logout: async () => {
+      clearPageCache();
       await api.logout();
       setIsLoggedIn(false);
       setMe(null);
