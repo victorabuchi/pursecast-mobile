@@ -124,22 +124,17 @@ export default function TopBar() {
                 )}
                 <PopHead title="Was it worth it?" sub={bell.length ? 'Rate a purchase with one tap.' : 'Nothing to rate right now.'} />
                 {bell.map((b) => (
-                  <View key={b.id} style={{ flexDirection: 'row', gap: 12, padding: 10, borderTopWidth: 1, borderTopColor: c.line }}>
-                    <View style={{ width: 36, height: 36, borderRadius: 9, backgroundColor: c.b, alignItems: 'center', justifyContent: 'center' }}>
-                      <Mark size={20} />
-                    </View>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Txt style={{ fontWeight: '700' }}>
+                  <View key={b.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 10, borderTopWidth: 1, borderTopColor: c.line }}>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Txt style={{ fontWeight: '700', fontSize: 13.5, lineHeight: 18 }} numberOfLines={2}>
                         Was {possessive(b.date, shell!.today)} {b.note.toLowerCase()} worth it?
                       </Txt>
-                      <Txt style={{ color: c.muted, fontSize: 12 }}>
+                      <Txt style={{ color: c.muted, fontSize: 12 }} numberOfLines={1}>
                         {exact(Math.abs(b.amount), shell!.currency)}
                         {b.category ? ` · ${b.category}` : ''} · {ago(b.date, shell!.today)}
                       </Txt>
-                      <View style={{ marginTop: 6 }}>
-                        <Faces mood={null} small onRate={(mood) => void run('rateAction', { form: { id: b.id, mood, back: '/worth-it' } })} />
-                      </View>
                     </View>
+                    <Faces mood={null} small onRate={(mood) => void run('rateAction', { form: { id: b.id, mood, back: '/worth-it' } })} />
                   </View>
                 ))}
                 {bell.length > 0 && (
